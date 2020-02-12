@@ -1,4 +1,5 @@
 # INSTALL PYTHON LATEST VERSION
+```
 sudo apt-get install build-essential checkinstall
 sudo apt-get install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
 cd /opt
@@ -9,12 +10,15 @@ sudo ./configure --enable-optimizations
 sudo make altinstall
 cd /opt
 sudo rm -f Python-3.8.0.tgz
+```
 
 
 # PYTHON DOESN'T CALL THE LATEST VERSION
 .bashrc:
+```
     alias python=python3.8
     alias python3=python3.8
+```
 
 
 # VSCODE KEYBOARD SHORTCUT
@@ -33,32 +37,46 @@ ctrl+shift+p > settings.json:
 
 
 # VIRTUAL ENVIRONMENT
+```
 python3 -m venv myvenv
 source myvenv/bin/activate
+```
 
 
-# ################################################# VIRTUAL ENVIRONMENT #################################################
+# ######## VIRTUAL ENVIRONMENT ########
 
 # INSTALLING DJANGO 
+```
 python -m pip install --upgrade pip
+```
 
+```
 djangogirls
 ├── myvenv
 │   └── ...
 └───requirements.txt
+```
 
 requirements.txt:
+```
     Django~=2.2.4
+```
 
+```
 pip install -r requirements.txt
+```
 
 
 # INSTALLING GIT
+```
 sudo apt install git
+```
 
 
 # CREATE DJANGO PROJECT
+```
 django-admin startproject mysite .
+```
 
 mysite/settings.py:
 ```
@@ -70,16 +88,23 @@ mysite/settings.py:
 
 
 # SET UP A DATABASE
+```
 python manage.py migrate
+```
 
 
 # STARTING THE WEB SERVER
+```
 python manage.py runserver
+```
 
 
 # CREATING AN APPLICATION INSIDE OUR PROJECT
+```
 python manage.py startapp blog
+```
 
+```
 djangogirls
 ├── blog
 │   ├── admin.py
@@ -100,6 +125,7 @@ djangogirls
 ├── myvenv
 │   └── ...
 └── requirements.txt
+```
 
 mysite/settings.py:
 ```
@@ -136,8 +162,10 @@ blog/models.py:
 
 
 # CREATE TABLES FOR MODELS IN YOUR DATABASE
+```
 python manage.py makemigrations blog
 python manage.py migrate blog
+```
 
 
 # DJANGO ADMIN
@@ -149,10 +177,13 @@ blog/admin.py:
     admin.site.register(Post)
 ```
 
+```
 python manage.py createsuperuser
+```
 
 
 # STARTING OUR GIT REPOSITORY
+```
 git init
 git config --global user.name "..."
 git config --global user.email ...
@@ -170,19 +201,24 @@ git config --global user.email ...
 git status
 git add --all .
 git commit -m "My Django Girls app, first commit"
+```
 
 Create GitHub repository: django-tutorial
 
+```
 git remote add origin https://github.com/marceljm/django-tutorial.git
 git push -u origin master
+```
 
 
 # CONFIGURING OUR SITE ON PYTHONANYWHERE
 Create a token: https://www.pythonanywhere.com/user/marceljm/account/#api_token
 PYTHONANYWHERE > New console > $ Bash
+```
     pip3.8 install --user pythonanywhere
     pa_autoconfigure_django.py --python=3.8 https://github.com/marceljm/django-tutorial.git
     python manage.py createsuperuser
+```
 
 
 # YOUR FIRST DJANGO URL!
@@ -216,20 +252,28 @@ blog/views.py:
 
 
 # YOUR FIRST TEMPLATE!
+```
 blog
 └───templates
     └───blog
         └── post_list.html
+```
 
 
 # PULL YOUR NEW CODE DOWN TO PYTHONANYWHERE, AND RELOAD YOUR WEB APP
+```
 git pull
+```
 Reload: https://www.pythonanywhere.com/web_app_setup/ 
 
 
 # DJANGO SHELL
+```
 python manage.py shell
+```
+
 Examples:
+```
 >>> from blog.models import Post
 >>> Post.objects.all()
 >>> from django.contrib.auth.models import User
@@ -248,6 +292,7 @@ Examples:
 >>> Post.objects.order_by('-created_date')
 >>> Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
 >>> exit()
+```
 
 
 # QUERYSET
@@ -296,20 +341,23 @@ blog/templates/blog/post_list.html:
 
 
 # WHERE TO PUT STATIC FILES FOR DJANGO
+```
 djangogirls
 ├── blog
 │   ├── migrations
 │   ├── static
 │   └── templates
 └── mysite
+```
 
-
+```
 # YOUR FIRST CSS FILE!
 djangogirls
 └─── blog
      └─── static
           └─── css
                └─── blog.css
+```
 
 
 blog/templates/blog/post_list.html:
@@ -352,11 +400,13 @@ blog/templates/blog/post_list.html:
 
 
 # CREATE A BASE TEMPLATE
+```
 blog
 └───templates
     └───blog
             base.html
             post_list.html
+```
 
 blog/templates/blog/base.html:
 ```
@@ -454,13 +504,17 @@ blog/templates/blog/post_detail.html:
 
 # UPDATING THE STATIC FILES ON THE SERVER
 PythonAnywhere command-line:
+```
     workon marceljm.pythonanywhere.com
     python manage.py collectstatic
+```
 
 
 # DJANGO FORMS
+```
 blog
    └── forms.py
+```
 
 blog/forms.py:
 ```
