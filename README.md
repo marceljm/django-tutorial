@@ -213,6 +213,7 @@ git push -u origin master
 
 # CONFIGURING OUR SITE ON PYTHONANYWHERE
 Create a token: https://www.pythonanywhere.com/user/marceljm/account/#api_token
+
 PYTHONANYWHERE > New console > $ Bash
 ```
     pip3.8 install --user pythonanywhere
