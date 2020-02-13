@@ -724,3 +724,128 @@ blog/views.py:
         return redirect('post_list')
 ```
 
+
+# AUTHORIZING ADD/EDIT OF POSTS
+blog/views.py:
+```
+    from django.contrib.auth.decorators import login_required
+
+    @login_required
+    def post_new(request):
+        [...]
+
+    @login_required
+    def post_edit(request, pk):
+        [...]
+
+    @login_required
+    def post_draft_list(request):
+        [...]
+
+    @login_required
+    def post_remove(request, pk):
+        [...]
+
+    @login_required
+    def post_publish(request, pk):
+        [...]                        
+```
+
+
+# LOG IN USERS
+mysite/urls.py:
+```
+    urlpatterns = [
+        [...]
+        path('accounts/login/', views.LoginView.as_view(), name='login'),
+        [...]
+    ]
+```
+
+blog/templates/registration/login.html:
+```
+    {% extends "blog/base.html" %}
+
+    {% block content %}
+        {% if form.errors %}
+            <p>Your username and password didn't match. Please try again.</p>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+            <table>
+            <tr>
+                <td>{{ form.username.label_tag }}</td>
+                <td>{{ form.username }}</td>
+            </tr>
+            <tr>
+                <td>{{ form.password.label_tag }}</td>
+                <td>{{ form.password }}</td>
+            </tr>
+            </table>
+
+            <input type="submit" value="login" />
+            <input type="hidden" name="next" value="{{ next }}" />
+        </form>
+    {% endblock %}
+```
+
+mysite/settings.py:
+```
+    LOGIN_REDIRECT_URL = '/'
+```
+
+
+# IMPROVING THE LAYOUT
+blog/templates/blog/base.html:
+```
+    {% if user.is_authenticated %}
+        [...]
+        <p class="top-menu">Hello {{ user.username }} <small>(<a href="{% url 'logout' %}">Log out</a>)</small></p>
+    {% else %}
+        <a href="{% url 'login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
+    {% endif %}
+```
+
+mysite/urls.py:
+```
+    urlpatterns = [
+        [...]
+        path('accounts/logout/', views.LogoutView.as_view(next_page='/'), name='logout'),
+        [...]
+    ]
+
+```
+
+
+# USER PERMISSIONS
+http://127.0.0.1:8000/admin > add new users > give Post permissions: "blog | post | Can add/change/delete/view post"
+
+
+blog/views.py:
+```
+    @login_required
+    @permission_required('blog.add_post')
+    def post_new(request):
+        [...]
+
+    @login_required
+    @permission_required('blog.change_post')
+    def post_edit(request, pk):
+        [...]
+
+    @login_required
+    @permission_required('blog.view_post')
+    def post_draft_list(request):
+        [...]
+
+    @login_required
+    @permission_required('blog.change_post')
+    def post_publish(request, pk):
+        [...]      
+
+    @login_required
+    @permission_required('blog.delete_post')
+    def post_remove(request, pk):
+        [...]                    
+```
