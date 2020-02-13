@@ -631,3 +631,96 @@ blog/templates/blog/post_detail.html:
     {% endif %}
 ```
 
+
+# SAVE NEW POSTS AS DRAFTS
+Remove from blog/views.py:
+```
+    post.published_date = timezone.now()
+```
+
+blog/templates/blog/base.html :
+```
+    <a href="{% url 'post_draft_list' %}" class="top-menu"><span class="glyphicon glyphicon-edit"></span></a>
+```
+
+blog/urls.py:
+```
+    urlpatterns = [
+        ...
+        path('drafts/', views.post_draft_list, name='post_draft_list'),
+    ]    
+```
+
+blog/views.py:
+```
+    def post_draft_list(request):
+        posts = Post.objects.filter(published_date__isnull=True).order_by('created_date')
+        return render(request, 'blog/post_draft_list.html', {'posts': posts})
+```
+
+blog/templates/blog/post_draft_list.html:
+```
+    {% extends 'blog/base.html' %}
+
+    {% block content %}
+    {% for post in posts %}
+    <div class="post">
+        <p class="date">created: {{ post.created_date|date:'d-m-Y' }}</p>
+        <h1><a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a></h1>
+        <p>{{ post.text|truncatechars:200 }}</p>
+    </div>
+    {% endfor %}
+    {% endblock %}
+```
+
+
+# ADD PUBLISH BUTTON
+blog/templates/blog/post_detail.html:
+```
+    ...
+    {% if post.published_date %}
+    <div class="date">
+        {{ post.published_date }}
+    </div>
+    {% else %}
+    <a class="btn btn-default" href="{% url 'post_publish' pk=post.pk %}">Publish</a>
+    {% endif %}
+    ...
+```
+
+blog/urls.py:
+```
+    path('post/<pk>/publish/', views.post_publish, name='post_publish'),
+```
+
+blog/views.py:
+```
+    def post_publish(request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        post.publish()
+        return redirect('post_detail', pk=pk)
+```
+
+
+# DELETE POST
+blog/templates/blog/post_detail.html:
+```
+    <a class="btn btn-default" href="{% url 'post_remove' pk=post.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
+```
+
+blog/urls.py:
+```
+    urlpatterns = [
+        ...
+        path('post/<pk>/remove/', views.post_remove, name='post_remove'),
+    ]
+```
+
+blog/views.py:
+```
+    def post_remove(request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        post.delete()
+        return redirect('post_list')
+```
+
