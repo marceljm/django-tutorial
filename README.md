@@ -849,3 +849,167 @@ blog/views.py:
     def post_remove(request, pk):
         [...]                    
 ```
+
+
+# CREATING COMMENT BLOG MODEL
+blog/models.py:
+```
+    [...]
+    class Comment(models.Model):
+        post = models.ForeignKey(
+            'blog.Post', on_delete=models.CASCADE, related_name='comments')
+        author = models.CharField(max_length=200)
+        text = models.TextField()
+        created_date = models.DateTimeField(default=timezone.now)
+        approved_comment = models.BooleanField(default=False)
+
+        def approve(self):
+            self.approved_comment = True
+            self.save()
+
+        def __str__(self):
+            return self.text
+```
+
+```
+python manage.py makemigrations blog
+python manage.py migrate blog
+```
+
+
+# REGISTER COMMENT MODEL IN ADMIN PANEL
+blog/admin.py:
+```
+    admin.site.register(Comment)
+```
+
+
+# MAKE OUR COMMENTS VISIBLE
+blog/templates/blog/post_detail.html:
+```
+    <hr>
+    {% for comment in post.comments.all %}
+    <div class="comment">
+        <div class="date">{{ comment.created_date }}</div>
+        <strong>{{ comment.author }}</strong>
+        <p>{{ comment.text|linebreaks }}</p>
+    </div>
+    {% empty %}
+    <p>No comments here yet :(</p>
+```
+
+static/css/blog.css:
+```
+    .comment {
+        margin: 20px 0px 20px 20px;
+    }
+```
+
+blog/templates/blog/post_list.html:
+```
+    <a href="{% url 'post_detail' pk=post.pk %}">Comments: {{ post.comments.count }}</a>
+```
+
+
+# LET YOUR READERS WRITE COMMENTS
+blog/forms.py:
+```
+    class CommentForm(forms.ModelForm):
+
+        class Meta:
+            model = Comment
+            fields = ('author', 'text',)
+```
+
+blog/templates/blog/post_detail.html:
+```
+    <a class="btn btn-default" href="{% url 'add_comment_to_post' pk=post.pk %}">Add comment</a>
+```
+
+blog/urls.py:
+```
+urlpatterns = [
+    [...]
+    path('post/<int:pk>/comment/', views.add_comment_to_post, name='add_comment_to_post'),
+]
+```
+
+blog/views.py:
+```
+    def add_comment_to_post(request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        if request.method == "POST":
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.save()
+                return redirect('post_detail', pk=post.pk)
+        else:
+            form = CommentForm()
+        return render(request, 'blog/add_comment_to_post.html', {'form': form})    
+```
+
+blog/templates/blog/add_comment_to_post.html:
+```
+    {% extends 'blog/base.html' %}
+
+    {% block content %}
+        <h1>New comment</h1>
+        <form method="POST" class="post-form">{% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="save btn btn-default">Send</button>
+        </form>
+    {% endblock %}
+```
+
+
+# MODERATING YOUR COMMENTS
+blog/templates/blog/post_detail.html:
+```
+    {% if user.is_authenticated or comment.approved_comment %}
+    <div class="comment">
+        <div class="date">
+            {{ comment.created_date }}
+            {% if not comment.approved_comment %}
+                <a class="btn btn-default" href="{% url 'comment_remove' pk=comment.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
+                <a class="btn btn-default" href="{% url 'comment_approve' pk=comment.pk %}"><span class="glyphicon glyphicon-ok"></span></a>
+            {% endif %}
+        </div>
+        <strong>{{ comment.author }}</strong>
+        <p>{{ comment.text|linebreaks }}</p>
+    </div>
+    {% endif %}
+```
+
+blog/urls.py:
+```
+    path('comment/<int:pk>/approve/', views.comment_approve, name='comment_approve'),
+    path('comment/<int:pk>/remove/', views.comment_remove, name='comment_remove'),
+```
+
+blog/views.py:
+```
+    @login_required
+    def comment_approve(request, pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        comment.approve()
+        return redirect('post_detail', pk=comment.post.pk)
+
+    @login_required
+    def comment_remove(request, pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        comment.delete()
+        return redirect('post_detail', pk=comment.post.pk)
+```
+
+blog/templates/blog/post_list.html:
+```
+    <a href="{% url 'post_detail' pk=post.pk %}">Comments: {{ post.approved_comments.count }}</a>
+```
+
+blog/models.py:
+```
+    def approved_comments(self):
+        return self.comments.filter(approved_comment=True)
+```
