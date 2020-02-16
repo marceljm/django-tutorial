@@ -883,6 +883,9 @@ blog/admin.py:
     admin.site.register(Comment)
 ```
 
+# POSTGRESQL INSTALLATION
+sudo apt-get install postgresql postgresql-contrib
+
 
 # MAKE OUR COMMENTS VISIBLE
 blog/templates/blog/post_detail.html:
@@ -1013,3 +1016,51 @@ blog/models.py:
     def approved_comments(self):
         return self.comments.filter(approved_comment=True)
 ```
+
+
+# POSTGRESQL INSTALLATION
+sudo apt-get install postgresql postgresql-contrib
+
+
+# CREATE DATABASE
+```
+sudo pg_ctlcluster 11 main start
+sudo -u postgres -i
+psql
+    CREATE USER marcel;
+    CREATE DATABASE djangogirls OWNER marcel;
+```
+
+Change password:
+```
+sudo -u postgres -i
+psql
+cd /data
+psql postgres postgres
+\password marcel
+```
+
+# UPDATING SETTINGS
+```
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'djangogirls',
+        'USER': 'marcel',
+        'PASSWORD': '[...]',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+```
+
+# INSTALLING POSTGRESQL PACKAGE FOR PYTHON
+```
+sudo apt-get install python-psycopg2
+sudo apt install libpq-dev
+pip install psycopg2
+python manage.py migrate
+python manage.py createsuperuser --username marcel
+```
+
+
